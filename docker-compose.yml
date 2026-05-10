@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: absence_record_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: absence_record
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: absence_record_api
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/absence_record
+    depends_on:
+      - postgres
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    container_name: absence_record_web
+    ports:
+      - '5173:5173'
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

@@ -1,0 +1,16 @@
+{
+  "name": "absence-record",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "db:push": "pnpm --filter @absence-record/api db:push",
+    "db:studio": "pnpm --filter @absence-record/api db:studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
+  }
+}

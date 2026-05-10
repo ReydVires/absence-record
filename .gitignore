@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+dist/
+build/
+.pnpm-debug.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Docker
+postgres_data/
+
+# Drizzle migrations (if you want to keep them out of git, though usually they are committed)
+# drizzle/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
