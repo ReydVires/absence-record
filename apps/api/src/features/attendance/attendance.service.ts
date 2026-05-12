@@ -1,16 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { AttendanceRepository } from './attendance.repository';
-import { CreateAttendanceDto } from '@absence-record/shared';
+import { ApiResponse, CreateAttendanceDto } from '@absence-record/shared';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private readonly repository: AttendanceRepository) {}
+  constructor(private readonly repository: AttendanceRepository) { }
 
-  async getAllRecords() {
-    return this.repository.findAll();
+  async findAll(): Promise<ApiResponse<{
+    [x: string]: unknown;
+  }>> {
+    const data = await this.repository.findAll();
+
+    return {
+      data: {
+        attendances: data,
+      },
+      statusCode: 200,
+      message: 'success',
+    }
   }
 
-  async recordAbsence(data: CreateAttendanceDto) {
+  async create(data: CreateAttendanceDto) {
+    const existingRecord = await this.repository.findByUserIdAndDate(
+      data.userId,
+      new Date(data.date),
+    );
+
+    if (existingRecord) {
+      throw new BadRequestException('Already clocked in for today');
+    }
+
     return this.repository.create(data);
   }
 }

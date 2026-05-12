@@ -8,7 +8,8 @@
     "lint": "pnpm -r lint",
     "format": "prettier --write .",
     "db:push": "pnpm --filter @absence-record/api db:push",
-    "db:studio": "pnpm --filter @absence-record/api db:studio"
+    "db:studio": "pnpm --filter @absence-record/api db:studio",
+    "db:seed": "pnpm --filter @absence-record/api db:seed"
   },
   "devDependencies": {
     "prettier": "^3.0.0"
