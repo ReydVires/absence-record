@@ -7,12 +7,18 @@ export const LoginSchema = z.object({
 
 export type LoginRequest = z.infer<typeof LoginSchema>;
 
+export const UserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  createdAt: z.string().datetime().optional(), // createdAt might be optional in some contexts
+});
+
+export type UserResponse = z.infer<typeof UserSchema>;
+
 export const AuthResponseSchema = z.object({
   accessToken: z.string(),
-  user: z.object({
-    id: z.string().uuid(),
-    email: z.string().email(),
-  }),
+  user: UserSchema,
 });
+
 
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;

@@ -1,5 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DB_PROVIDER, DbProvider } from '../../database/db.provider';
+import { UserResponse } from '@absence-record/shared';
+
+
+// Repository entity uses Date objects instead of string ISO dates
+export type User = Omit<UserResponse, 'createdAt'> & {
+  createdAt: Date;
+  password?: string; // Repository needs password for auth
+};
 
 export interface UserRow {
   id: string;
@@ -8,9 +16,6 @@ export interface UserRow {
   created_at: Date;
 }
 
-export interface User extends Omit<UserRow, 'created_at'> {
-  createdAt: Date;
-}
 
 
 @Injectable()

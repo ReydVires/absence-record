@@ -1,20 +1,22 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DB_PROVIDER, DbProvider } from '../../database/db.provider';
-import { CreateAttendanceDto } from '@absence-record/shared';
+import { CreateAttendanceDto, AttendanceResponse } from '@absence-record/shared';
+
+// Repository entity uses Date objects instead of string ISO dates
+export type Attendance = Omit<AttendanceResponse, 'date' | 'createdAt'> & {
+  date: Date;
+  createdAt: Date;
+};
 
 export interface AttendanceRow {
   id: string;
   user_id: string;
-  status: 'present' | 'absent' | 'late' | 'excused';
+  status: Attendance['status'];
   note?: string;
   date: Date;
   created_at: Date;
 }
 
-export interface Attendance extends Omit<AttendanceRow, 'user_id' | 'created_at'> {
-  userId: string;
-  createdAt: Date;
-}
 
 
 @Injectable()
