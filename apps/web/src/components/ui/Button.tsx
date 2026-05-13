@@ -1,4 +1,5 @@
 import { useState } from "react";
+import styles from "./Button.module.css";
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
@@ -12,7 +13,7 @@ export const Button = (props: Props) => {
     children,
     loadingText = 'Loading...',
     variant = 'primary',
-    style,
+    className = '',
     disabled,
     onClick,
     ...rest
@@ -22,29 +23,18 @@ export const Button = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const isLoading = props.isLoading || loading;
 
-  const baseStyle: React.CSSProperties = {
-    padding: '0.5rem 1rem',
-    borderRadius: '4px',
-    cursor: isLoading || disabled ? 'not-allowed' : 'pointer',
-    opacity: isLoading || disabled ? 0.7 : 1,
-    border: 'none',
-    fontWeight: 'bold',
-    transition: 'all 0.2s',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-  };
-
-  const variants = {
-    primary: { backgroundColor: '#007bff', color: 'white' },
-    secondary: { backgroundColor: '#6c757d', color: 'white' },
-    danger: { backgroundColor: '#dc3545', color: 'white' },
-  };
+  const buttonClasses = [
+    styles.btn,
+    styles[variant],
+    className
+  ].filter(Boolean).join(' ');
 
   return (
     <button
       {...rest}
+      className={buttonClasses}
       onClick={async (event) => {
+        if (isLoading || disabled) return;
         setLoading(true);
         try {
           await onClick?.(event);
@@ -53,25 +43,12 @@ export const Button = (props: Props) => {
         }
       }}
       disabled={isLoading || disabled}
-      style={{ ...baseStyle, ...variants[variant], ...style }}
     >
       {isLoading && (
-        <span className="spinner" style={{
-          width: '12px',
-          height: '12px',
-          border: '2px solid white',
-          borderTopColor: 'transparent',
-          borderRadius: '50%',
-          display: 'inline-block',
-          animation: 'spin 1s linear infinite'
-        }} />
+        <span className={styles.spinner} />
       )}
-      {isLoading ? loadingText : children}
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      <span>{isLoading ? loadingText : children}</span>
     </button>
   );
 };
+

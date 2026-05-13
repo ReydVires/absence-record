@@ -1,0 +1,107 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.authSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.email {
+  font-weight: 600;
+}
+
+.status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.recordsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.recordItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease;
+}
+
+.recordItem:hover {
+  border-color: #d1d5db;
+}
+
+.recordInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.recordDate {
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.recordNote {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.badge {
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.present { background-color: #dcfce7; color: #166534; }
+.absent { background-color: #fee2e2; color: #991b1b; }
+.late { background-color: #fef3c7; color: #92400e; }
+.excused { background-color: #dbeafe; color: #1e40af; }
+
+.loading, .error, .empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
