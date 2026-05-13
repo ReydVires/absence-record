@@ -7,8 +7,7 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "format": "prettier --write .",
-    "db:push": "pnpm --filter @absence-record/api db:push",
-    "db:studio": "pnpm --filter @absence-record/api db:studio",
+    "db:init": "pnpm --filter @absence-record/api db:init",
     "db:seed": "pnpm --filter @absence-record/api db:seed"
   },
   "devDependencies": {

@@ -1,18 +1,22 @@
 # Absence Record - Fullstack Monorepo
 
-Welcome to the Absence Record project! This is a production-grade, decoupled fullstack application built with **NestJS** (Backend), **Vite + React** (Frontend), and **Drizzle ORM** (Database).
+Welcome to the Absence Record project! This is a production-grade, decoupled fullstack application built with **NestJS** (Backend), **Vite + React** (Frontend), and **PostgreSQL** (Database).
 
 ## 🚀 Quick Start
 
+Follow these steps to get the project running locally on your machine.
+
 ### 1. Prerequisites
 
+Ensure you have the following installed:
+
 - **Node.js** (v18+)
-- **pnpm** (Recommended monorepo manager)
-- **Docker Desktop** (For the PostgreSQL database)
+- **pnpm** (Recommended monorepo manager: `npm install -g pnpm`)
+- **Docker Desktop** (For running the PostgreSQL database)
 
-### 2. Setup
+### 2. Installation
 
-Clone the repository and install dependencies:
+Clone the repository and install all dependencies from the root:
 
 ```bash
 pnpm install
@@ -20,23 +24,36 @@ pnpm install
 
 ### 3. Environment Configuration
 
-The project is already pre-configured with `.env` files in:
-
-- Root: `.env`
-- `apps/api/.env`
-- `apps/web/.env`
-
-### 4. Start the Database
-
-Ensure Docker is running, then start the PostgreSQL container:
+Copy the example environment file to the root and app directories. The project is pre-configured to work with the default Docker settings.
 
 ```bash
-docker compose up -d postgres
+# Root environment (Database and Shared config)
+cp .env.example .env
 ```
+
+*Note: Ensure `apps/api/.env` and `apps/web/.env` are also set up if you need to override defaults.*
+
+### 4. Database Setup
+
+We use Docker to run PostgreSQL.
+
+1. **Initialize the Schema**:
+   Run the following command to create the necessary tables:
+
+   ```bash
+   pnpm db:init
+   ```
+
+2. **Seed the Database**:
+   Create an initial admin user (`admin@admin.com` / `password123`):
+
+   ```bash
+   pnpm db:seed
+   ```
 
 ### 5. Run the Application
 
-Start both the API and the Web app in parallel:
+Start both the API and the Web app in development mode:
 
 ```bash
 pnpm dev
@@ -47,49 +64,48 @@ pnpm dev
 
 ---
 
-## 🏗 Architecture Walkthrough (For React Engineers)
+## 🏗 Architecture Walkthrough
 
-As a React developer, you can think of the backend architecture in terms of **"Vertical Slicing"**—just like how you organize your React components by feature.
+This project uses a **Feature-based Monorepo** structure, making it highly scalable and easy to maintain.
 
 ### 1. The Shared Package (`/packages/shared`)
 
-This is the "Source of Truth". We use **Zod** to define schemas.
+The "Source of Truth" for the entire app. It contains:
 
-- **Why?** One schema generates both the **Validation Logic** for the API and the **TypeScript Types** for the Frontend.
-- If you change a field here, both the API and the Frontend will immediately show type errors until they are updated.
+- **Zod Schemas**: Defined once, used by the API for validation and the Frontend for type safety.
+- **TypeScript Types**: Automatically inferred from schemas.
 
 ### 2. The Backend (`/apps/api`)
 
-NestJS might look intimidating with its decorators, but here is how it maps to React concepts:
+Built with NestJS and raw `pg` for high performance and full control over SQL queries.
 
-- **Modules** (e.g., `attendance.module.ts`): Think of these as a **Context Provider**. It bundles everything related to a feature together so other parts of the app can use it.
-- **Controllers** (e.g., `attendance.controller.ts`): These are your **API Routes**. They define the URLs (`/attendance`) and which HTTP methods (`GET`, `POST`) are allowed.
-- **Services** (e.g., `attendance.service.ts`): This is where the **Business Logic** lives. If you need to calculate something or check permissions, do it here. It's like a custom hook that holds logic but no UI.
-- **Repositories** (e.g., `attendance.repository.ts`): These handle **Data Access**. They talk to the database using Drizzle. Think of this as the logic inside an `api.ts` file in React, but for the database.
+- **Vertical Slicing**: Code is organized by feature (e.g., `auth`, `attendance`).
+- **Repositories**: Dedicated layer for database interactions, keeping services clean.
 
 ### 3. The Frontend (`/apps/web`)
 
-We use a modern React stack:
+A modern React application using:
 
-- **TanStack Query**: For server state management (caching, loading states).
-- **Path Aliases**: Use `@/` to point to `src/` and `@shared/` to point to the shared package.
-- **Feature Folders**: Each domain (like `attendance`) has its own `components/`, `hooks/`, and `api.ts`.
+- **TanStack Query**: For efficient data fetching and caching.
+- **Shadcn UI**: For a premium, accessible design system.
 
 ---
 
 ## 🛠 Useful Commands
 
-| Command          | Description                                             |
-| :--------------- | :------------------------------------------------------ |
-| `pnpm dev`       | Starts API and Web apps in parallel with hot-reload.    |
-| `pnpm db:push`   | Syncs your Drizzle schema to the actual database.       |
-| `pnpm db:studio` | Opens a GUI in your browser to view/edit database data. |
-| `pnpm build`     | Builds all packages for production.                     |
+| Command        | Description                                           |
+| :------------- | :---------------------------------------------------- |
+| `pnpm dev`     | Starts API and Web apps in parallel.                  |
+| `pnpm db:init` | Executes `schema.sql` to set up database tables.      |
+| `pnpm db:seed` | Adds initial seed data to the database.               |
+| `pnpm build`   | Builds all packages for production.                   |
+| `pnpm format`  | Formats the entire codebase using Prettier.           |
 
 ## 📝 Extending the Project
 
-To add a new feature (e.g., `users`):
+To add a new feature:
 
-1. Add the Zod schema in `packages/shared/src/schemas/users.ts`.
-2. Create a new folder `apps/api/src/features/users` and implement the Module, Controller, Service, and Repository.
-3. Create a new folder `apps/web/src/features/users` for your React components and hooks.
+1. **Define the Schema**: Add a new Zod schema in `packages/shared/src/schemas/`.
+2. **Update the DB**: Add the table definition to `schema.sql`.
+3. **Backend**: Create a new feature folder in `apps/api/src/features/`.
+4. **Frontend**: Implement the feature logic and UI in `apps/web/src/features/`.
