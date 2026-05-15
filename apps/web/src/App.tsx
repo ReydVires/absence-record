@@ -2,10 +2,37 @@ import { useAttendance } from '@/features/attendance/hooks';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { Button } from './components/ui/Button';
 import styles from './App.module.css';
+import { Modal } from './components/ui/Modal';
+import { Label } from './components/ui/Label';
+import { Input } from './components/ui/Input';
+import { useState } from 'react';
 
 function App() {
   const { data: records, isLoading, isError, error } = useAttendance();
-  const { login, user, isAuthenticated, logout } = useAuth();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showLoginError, setShowLoginError] = useState(false);
+  const { login, user, isAuthenticated, logout, isLoading: isLoginLoading, error: loginError } = useAuth({
+    onError: () => setShowLoginError(true)
+  });
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+
+    const formData = new FormData(form);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      await login({ email, password });
+    } catch (err) {
+      const passwordInput = form.elements.namedItem('password') as HTMLInputElement;
+      if (passwordInput) {
+        passwordInput.value = '';
+      }
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -22,17 +49,57 @@ function App() {
           </div>
 
           {!isAuthenticated ? (
-            <Button
-              loadingText="Logging in..."
-              onClick={async () => {
-                await login({
-                  email: "admin@admin.com",
-                  password: "password123"
-                });
+            <Modal
+              title="Login"
+              description="Enter your credentials to login"
+              trigger={
+                <Button variant="primary">
+                  Login
+                </Button>
+              }
+              onOpenChange={() => {
+                setShowLoginError(false);
               }}
             >
-              Login
-            </Button>
+              <form id='login-form' onSubmit={handleLogin} className={styles.flexCol}>
+                <section className={styles.flexCol}>
+                  <div className={styles.fieldGroup}>
+                    <Label htmlFor="email">Email</Label>
+                    <Input type="email" name="email" placeholder='Eg. admin@admin.com' required />
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <Label htmlFor="password">Password</Label>
+                    <div className={styles.passwordWrapper}>
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        placeholder='Eg. password123'
+                        required
+                      />
+                      <button
+                        type="button"
+                        className={styles.eyeButton}
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+                {showLoginError && loginError ?
+                  <span className={styles.errorMsg}>
+                    {loginError.message.includes('401') ? 'Invalid credentials' : loginError.message}
+                  </span> : null}
+                <Button
+                  loadingText="Checking in..."
+                  type='submit'
+                  isLoading={isLoginLoading}
+                >
+                  Check in
+                </Button>
+              </form>
+            </Modal>
           ) : (
             <Button variant="secondary" onClick={logout}>
               Logout
@@ -69,8 +136,8 @@ function App() {
             </div>
           )}
         </section>
-      </main>
-    </div>
+      </main >
+    </div >
   );
 }
 

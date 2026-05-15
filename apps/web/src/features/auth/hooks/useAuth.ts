@@ -2,7 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { LoginRequest, AuthResponse, ApiResponse } from '@absence-record/shared';
 
-export const useAuth = () => {
+interface Props {
+  onError?: (error: Error) => void;
+}
+
+export const useAuth = (props?: Props) => {
   const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
@@ -21,6 +25,9 @@ export const useAuth = () => {
       // Invalidate all queries to refresh data with new auth state
       queryClient.invalidateQueries();
     },
+    onError: (error) => {
+      props?.onError?.(error);
+    }
   });
 
   const logout = () => {

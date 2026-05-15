@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import styles from "./Button.module.css";
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -8,7 +8,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
 }
 
-export const Button = (props: Props) => {
+export const Button = React.forwardRef<HTMLButtonElement, Props>((props, ref) => {
   const {
     children,
     loadingText = 'Loading...',
@@ -16,12 +16,14 @@ export const Button = (props: Props) => {
     className = '',
     disabled,
     onClick,
+    isLoading: externalIsLoading,
     ...rest
   } = props
 
 
   const [loading, setLoading] = useState(false);
-  const isLoading = props.isLoading || loading;
+  const isLoading = externalIsLoading || loading;
+
 
   const buttonClasses = [
     styles.btn,
@@ -32,6 +34,7 @@ export const Button = (props: Props) => {
   return (
     <button
       {...rest}
+      ref={ref}
       className={buttonClasses}
       onClick={async (event) => {
         if (isLoading || disabled) return;
@@ -50,5 +53,8 @@ export const Button = (props: Props) => {
       <span>{isLoading ? loadingText : children}</span>
     </button>
   );
-};
+});
+
+Button.displayName = 'Button';
+
 
