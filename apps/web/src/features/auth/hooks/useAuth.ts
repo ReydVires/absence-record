@@ -17,6 +17,7 @@ export const useAuth = (props?: Props) => {
     onSuccess: (data) => {
       // Store token securely
       localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
 
       // Update axios default headers for subsequent requests
@@ -32,10 +33,11 @@ export const useAuth = (props?: Props) => {
 
   const logout = () => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     delete apiClient.defaults.headers.common['Authorization'];
     queryClient.clear();
-    window.location.href = '/login'; // Or use your router navigation
+    window.location.href = '/';
   };
 
   const isAuthenticated = !!localStorage.getItem('accessToken');

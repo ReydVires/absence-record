@@ -2,14 +2,33 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from './user.repository';
-import type { LoginRequest, AuthResponse, ApiResponse } from '@absence-record/shared';
+import type { LoginRequest, AuthResponse, ApiResponse, RefreshTokenRequest } from '@absence-record/shared';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userRepository: UserRepository,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) { }
+
+  private get refreshSecret(): string {
+    return this.configService.get<string>('JWT_REFRESH_SECRET') || 'super-refresh-secret';
+  }
+
+  private generateTokens(userId: string, email: string) {
+    const payload = { email, sub: userId };
+
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: '1m' }),
+      refreshToken: this.jwtService.sign(payload, {
+        secret: this.refreshSecret,
+        expiresIn: '2m',
+      }),
+    };
+  }
+
 
   async login(loginDto: LoginRequest): Promise<ApiResponse<AuthResponse>> {
     const user = await this.userRepository.findByEmail(loginDto.email);
@@ -27,11 +46,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user.id };
+    const tokens = this.generateTokens(user.id, user.email);
 
     return {
       data: {
-        accessToken: this.jwtService.sign(payload),
+        ...tokens,
         user: {
           id: user.id,
           email: user.email,
@@ -40,6 +59,32 @@ export class AuthService {
       statusCode: 200,
       message: 'success',
     };
+  }
+
+  async refreshTokens(dto: RefreshTokenRequest): Promise<ApiResponse<AuthResponse>> {
+    try {
+      // Verify refresh token
+      const payload = this.jwtService.verify(dto.refreshToken, {
+        secret: this.refreshSecret,
+      });
+
+      // Issue new tokens
+      const tokens = this.generateTokens(payload.sub, payload.email);
+
+      return {
+        data: {
+          ...tokens,
+          user: {
+            id: payload.sub,
+            email: payload.email,
+          },
+        },
+        statusCode: 200,
+        message: 'success',
+      };
+    } catch (e) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
   }
 
   // Helper for initial setup/seeding if needed

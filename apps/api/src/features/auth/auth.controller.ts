@@ -1,14 +1,21 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginRequest } from '@absence-record/shared';
+import type { LoginRequest, AuthResponse, ApiResponse, RefreshTokenRequest } from '@absence-record/shared';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
+  @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() loginDto: LoginRequest) {
+  login(@Body() loginDto: LoginRequest): Promise<ApiResponse<AuthResponse>> {
     return this.authService.login(loginDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  refresh(@Body() refreshDto: RefreshTokenRequest): Promise<ApiResponse<AuthResponse>> {
+    return this.authService.refreshTokens(refreshDto);
   }
 
   @Post('register')
