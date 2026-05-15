@@ -21,10 +21,10 @@ export class AuthService {
     const payload = { email, sub: userId };
 
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: '1m' }),
+      accessToken: this.jwtService.sign(payload, { expiresIn: '12h' }),
       refreshToken: this.jwtService.sign(payload, {
         secret: this.refreshSecret,
-        expiresIn: '2m',
+        expiresIn: '3d',
       }),
     };
   }
