@@ -5,16 +5,18 @@ import styles from './App.module.css';
 import { Modal } from './components/ui/Modal';
 import { Label } from './components/ui/Label';
 import { Input } from './components/ui/Input';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 function App() {
-  const { data: records, isLoading, isError, error } = useAttendance();
+  const { data: records, isLoading, isError, error, checkIn, isCheckingIn, checkOut, isCheckingOut } = useAttendance();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showLoginError, setShowLoginError] = useState(false);
   const { login, user, isAuthenticated, logout, isLoading: isLoginLoading, error: loginError } = useAuth({
     onError: () => setShowLoginError(true)
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,6 +35,41 @@ function App() {
       }
     }
   }
+
+  // Determine today's check-in status
+  const today = new Date().toDateString();
+  const todaysRecord = records?.find(r => new Date(r.date).toDateString() === today);
+  const hasCheckedInToday = !!todaysRecord;
+  const hasCheckedOutToday = !!todaysRecord?.checkOutTime;
+
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+
+  const handleCheckIn = async () => {
+    if (!user?.id) return;
+
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      alert('Please select an image first');
+      return;
+    }
+
+    try {
+      await checkIn({ userId: user.id, imageName: file.name });
+      setIsCheckInModalOpen(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err) {
+      // Error handling is done by TanStack Query
+    }
+  };
+
+  const handleCheckOut = async () => {
+    if (!todaysRecord?.id) return;
+    try {
+      await checkOut(todaysRecord.id);
+    } catch (err) {
+      // Error handling is done by TanStack Query
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -92,11 +129,11 @@ function App() {
                     {loginError.message.includes('401') ? 'Invalid credentials' : loginError.message}
                   </span> : null}
                 <Button
-                  loadingText="Checking in..."
+                  loadingText="Logging in..."
                   type='submit'
                   isLoading={isLoginLoading}
                 >
-                  Check in
+                  Login
                 </Button>
               </form>
             </Modal>
@@ -108,6 +145,59 @@ function App() {
         </div>
 
         <section hidden={!isAuthenticated}>
+          {hasCheckedOutToday ? (
+            <div className={styles.completedMsg}>
+              ✓ Attendance completed for today
+            </div>
+          ) : hasCheckedInToday ? (
+            <div className={styles.checkInSection}>
+              <span>You've checked in today.</span>
+              <Button
+                variant="secondary"
+                onClick={handleCheckOut}
+                isLoading={isCheckingOut}
+                loadingText="Checking out..."
+              >
+                Check Out
+              </Button>
+            </div>
+          ) : (
+            <div className={styles.checkInSection}>
+              <Modal
+                title="Daily Check In"
+                description="Upload a photo to confirm your attendance."
+                open={isCheckInModalOpen}
+                onOpenChange={setIsCheckInModalOpen}
+                trigger={
+                  <Button variant="primary">
+                    Check In
+                  </Button>
+                }
+              >
+                <div className={styles.flexCol}>
+                  <div className={styles.fieldGroup}>
+                    <Label htmlFor="checkin-image">Attachment (Required)</Label>
+                    <input
+                      ref={fileInputRef}
+                      id="checkin-image"
+                      type="file"
+                      accept="image/*"
+                      className={styles.fileInput}
+                    />
+                  </div>
+                  <Button
+                    variant="primary"
+                    onClick={handleCheckIn}
+                    isLoading={isCheckingIn}
+                    loadingText="Checking in..."
+                  >
+                    Confirm Check In
+                  </Button>
+                </div>
+              </Modal>
+            </div>
+          )}
+
           {isLoading && <div className={styles.loading}>Loading records...</div>}
 
           {isError && (
@@ -122,23 +212,37 @@ function App() {
                 <div key={record.id} className={styles.recordItem}>
                   <div className={styles.recordInfo}>
                     <span className={styles.recordDate}>{new Date(record.date).toLocaleDateString()}</span>
-                    <span className={styles.recordNote}>{record.note || 'No notes added'}</span>
+                    <span className={styles.recordNote}>
+                      {record.imageName ? `📎 ${record.imageName}` : record.note || 'No notes added'}
+                    </span>
                   </div>
-                  <span className={`${styles.badge} ${styles[record.status]}`}>
-                    {record.status}
-                  </span>
+                  <div className={styles.recordMeta}>
+                    <span className={`${styles.badge} ${styles[record.status]}`}>
+                      {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                    </span>
+                    {record.date ? (
+                      <span className={styles.checkInTime}>
+                        In: {new Date(record.date).toLocaleTimeString()}
+                      </span>
+                    ) : null}
+                    {record.checkOutTime ? (
+                      <span className={styles.checkOutTime}>
+                        Out: {new Date(record.checkOutTime).toLocaleTimeString()}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               ))}
-
               {records?.length === 0 && (
                 <div className={styles.empty}>No records found.</div>
               )}
             </div>
           )}
         </section>
-      </main >
-    </div >
+      </main>
+    </div>
   );
 }
 
 export default App;
+

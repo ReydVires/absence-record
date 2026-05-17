@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS attendance (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   status TEXT NOT NULL CHECK (status IN ('present', 'absent', 'late', 'excused')),
   note TEXT,
+  image_name TEXT,
   date TIMESTAMP WITH TIME ZONE NOT NULL,
+  check_out_time TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE attendance ADD COLUMN IF NOT EXISTS image_name TEXT;
+ALTER TABLE attendance ADD COLUMN IF NOT EXISTS check_out_time TIMESTAMP WITH TIME ZONE;
