@@ -19,11 +19,18 @@ export const useAttendance = () => {
 
   const checkInMutation = useMutation({
     mutationFn: async (params: { userId: string; imageName?: string }) => {
+      const now = new Date();
+      
+      // Determine if late (after 09:00 AM local time)
+      const lateThreshold = new Date(now);
+      lateThreshold.setHours(9, 0, 0, 0);
+      const status = now > lateThreshold ? 'late' : 'present';
+
       const res = await apiClient.post('/attendance', {
         userId: params.userId,
-        status: 'present',
+        status,
         imageName: params.imageName,
-        date: new Date().toISOString(),
+        date: now.toISOString(),
       });
       return res.data;
     },

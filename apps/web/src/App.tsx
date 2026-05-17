@@ -71,6 +71,42 @@ function App() {
     }
   };
 
+  const renderAttendanceActions = () => {
+    if (isLoading) return null;
+
+    if (hasCheckedOutToday) {
+      return (
+        <div className={styles.completedMsg}>
+          ✓ Attendance completed for today
+        </div>
+      );
+    }
+
+    if (hasCheckedInToday) {
+      return (
+        <div className={styles.checkInSection}>
+          <span>You've checked in today.</span>
+          <Button
+            variant="secondary"
+            onClick={handleCheckOut}
+            isLoading={isCheckingOut}
+            loadingText="Checking out..."
+          >
+            Check Out
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className={styles.checkInSection}>
+        <Button variant="primary" onClick={() => setIsCheckInModalOpen(true)}>
+          Check In
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -145,58 +181,35 @@ function App() {
         </div>
 
         <section hidden={!isAuthenticated}>
-          {hasCheckedOutToday ? (
-            <div className={styles.completedMsg}>
-              ✓ Attendance completed for today
-            </div>
-          ) : hasCheckedInToday ? (
-            <div className={styles.checkInSection}>
-              <span>You've checked in today.</span>
+          <Modal
+            title="Daily Check In"
+            description="Upload a photo to confirm your attendance."
+            open={isCheckInModalOpen}
+            onOpenChange={setIsCheckInModalOpen}
+          >
+            <div className={styles.flexCol}>
+              <div className={styles.fieldGroup}>
+                <Label htmlFor="checkin-image">Attachment (Required)</Label>
+                <input
+                  ref={fileInputRef}
+                  id="checkin-image"
+                  type="file"
+                  accept="image/*"
+                  className={styles.fileInput}
+                />
+              </div>
               <Button
-                variant="secondary"
-                onClick={handleCheckOut}
-                isLoading={isCheckingOut}
-                loadingText="Checking out..."
+                variant="primary"
+                onClick={handleCheckIn}
+                isLoading={isCheckingIn}
+                loadingText="Checking in..."
               >
-                Check Out
+                Confirm Check In
               </Button>
             </div>
-          ) : (
-            <div className={styles.checkInSection}>
-              <Modal
-                title="Daily Check In"
-                description="Upload a photo to confirm your attendance."
-                open={isCheckInModalOpen}
-                onOpenChange={setIsCheckInModalOpen}
-                trigger={
-                  <Button variant="primary">
-                    Check In
-                  </Button>
-                }
-              >
-                <div className={styles.flexCol}>
-                  <div className={styles.fieldGroup}>
-                    <Label htmlFor="checkin-image">Attachment (Required)</Label>
-                    <input
-                      ref={fileInputRef}
-                      id="checkin-image"
-                      type="file"
-                      accept="image/*"
-                      className={styles.fileInput}
-                    />
-                  </div>
-                  <Button
-                    variant="primary"
-                    onClick={handleCheckIn}
-                    isLoading={isCheckingIn}
-                    loadingText="Checking in..."
-                  >
-                    Confirm Check In
-                  </Button>
-                </div>
-              </Modal>
-            </div>
-          )}
+          </Modal>
+
+          {renderAttendanceActions()}
 
           {isLoading && <div className={styles.loading}>Loading records...</div>}
 
