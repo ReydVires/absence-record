@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto, CheckOutRequest } from '@absence-record/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -9,8 +9,8 @@ export class AttendanceController {
   constructor(private readonly service: AttendanceService) { }
 
   @Get()
-  async getRecords() {
-    return this.service.findAll();
+  async getRecords(@Request() req: { user: { id: string; role: string } }) {
+    return this.service.findAll(req.user);
   }
 
   @Post()

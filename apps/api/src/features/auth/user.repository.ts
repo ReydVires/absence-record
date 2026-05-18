@@ -13,6 +13,7 @@ export interface UserRow {
   id: string;
   email: string;
   password?: string;
+  role: 'employee' | 'admin';
   created_at: Date;
 }
 
@@ -62,10 +63,11 @@ export class UserRepository {
   }
 
 
-  async create(data: { email: string; password: string }): Promise<User | null> {
+  async create(data: { email: string; password: string; role?: 'employee' | 'admin' }): Promise<User | null> {
+    const role = data.role || 'employee';
     const { rows } = await this.db.query<UserRow>(
-      'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *',
-      [data.email, data.password]
+      'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING *',
+      [data.email, data.password, role]
     );
 
     if (rows[0]) {
@@ -76,6 +78,58 @@ export class UserRepository {
       };
     }
     return null;
+  }
+
+  async findAll(): Promise<User[]> {
+    const { rows } = await this.db.query<UserRow>(
+      'SELECT id, email, role, created_at FROM users ORDER BY created_at DESC'
+    );
+    return rows.map(row => {
+      const { created_at, ...user } = row;
+      return {
+        ...user,
+        createdAt: created_at,
+      };
+    });
+  }
+
+  async update(id: string, data: { email?: string; password?: string; role?: 'employee' | 'admin' }): Promise<User | null> {
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (data.email) {
+      updates.push(`email = $${paramIndex++}`);
+      values.push(data.email);
+    }
+    if (data.password) {
+      updates.push(`password = $${paramIndex++}`);
+      values.push(data.password);
+    }
+    if (data.role) {
+      updates.push(`role = $${paramIndex++}`);
+      values.push(data.role);
+    }
+
+    if (updates.length === 0) return this.findById(id);
+
+    values.push(id);
+    const query = `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING id, email, role, created_at`;
+
+    const { rows } = await this.db.query<UserRow>(query, values);
+    if (rows[0]) {
+      const { created_at, ...user } = rows[0];
+      return {
+        ...user,
+        createdAt: created_at,
+      };
+    }
+    return null;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const { rowCount } = await this.db.query('DELETE FROM users WHERE id = $1', [id]);
+    return (rowCount ?? 0) > 0;
   }
 
 }

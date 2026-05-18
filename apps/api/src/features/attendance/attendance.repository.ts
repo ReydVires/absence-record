@@ -46,6 +46,14 @@ export class AttendanceRepository {
     return rows.map(this.mapRow);
   }
 
+  async findByUserId(userId: string): Promise<Attendance[]> {
+    const { rows } = await this.db.query<AttendanceRow>(
+      'SELECT * FROM attendance WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return rows.map(this.mapRow);
+  }
+
   async findByUserIdAndDate(userId: string, date: Date): Promise<Attendance | null> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);

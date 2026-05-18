@@ -6,10 +6,12 @@ import { ApiResponse, CreateAttendanceDto, CheckOutRequest } from '@absence-reco
 export class AttendanceService {
   constructor(private readonly repository: AttendanceRepository) { }
 
-  async findAll(): Promise<ApiResponse<{
+  async findAll(user: { id: string; role: string }): Promise<ApiResponse<{
     [x: string]: unknown;
   }>> {
-    const data = await this.repository.findAll();
+    const data = user.role === 'admin' 
+      ? await this.repository.findAll()
+      : await this.repository.findByUserId(user.id);
 
     return {
       data: {

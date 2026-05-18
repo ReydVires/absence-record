@@ -17,8 +17,8 @@ export class AuthService {
     return this.configService.get<string>('JWT_REFRESH_SECRET') || 'super-refresh-secret';
   }
 
-  private generateTokens(userId: string, email: string) {
-    const payload = { email, sub: userId };
+  private generateTokens(userId: string, email: string, role: string) {
+    const payload = { email, sub: userId, role };
 
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: '12h' }),
@@ -46,7 +46,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = this.generateTokens(user.id, user.email);
+    const tokens = this.generateTokens(user.id, user.email, user.role);
 
     return {
       data: {
@@ -54,6 +54,7 @@ export class AuthService {
         user: {
           id: user.id,
           email: user.email,
+          role: user.role,
         },
       },
       statusCode: 200,
@@ -69,7 +70,7 @@ export class AuthService {
       });
 
       // Issue new tokens
-      const tokens = this.generateTokens(payload.sub, payload.email);
+      const tokens = this.generateTokens(payload.sub, payload.email, payload.role);
 
       return {
         data: {
@@ -77,6 +78,7 @@ export class AuthService {
           user: {
             id: payload.sub,
             email: payload.email,
+            role: payload.role,
           },
         },
         statusCode: 200,
@@ -98,6 +100,7 @@ export class AuthService {
     return this.userRepository.create({
       email: registerDto.email,
       password: hashedPassword,
+      role: 'employee',
     });
   }
 }
