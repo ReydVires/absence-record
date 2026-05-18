@@ -43,15 +43,18 @@ function App() {
   const hasCheckedOutToday = !!todaysRecord?.checkOutTime;
 
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const handleCheckIn = async () => {
     if (!user?.id) return;
 
     const file = fileInputRef.current?.files?.[0];
     if (!file) {
-      alert('Please select an image first');
+      setFileError('Please select an image first');
       return;
     }
+
+    setFileError(null);
 
     try {
       await checkIn({ userId: user.id, imageName: file.name });
@@ -185,18 +188,29 @@ function App() {
             title="Daily Check In"
             description="Upload a photo to confirm your attendance."
             open={isCheckInModalOpen}
-            onOpenChange={setIsCheckInModalOpen}
+            onOpenChange={(open) => {
+              setIsCheckInModalOpen(open);
+              if (!open) {
+                setFileError(null);
+              }
+            }}
           >
             <div className={styles.flexCol}>
               <div className={styles.fieldGroup}>
-                <Label htmlFor="checkin-image">Attachment (Required)</Label>
+                <Label htmlFor="checkin-image">Attachment</Label>
                 <input
                   ref={fileInputRef}
                   id="checkin-image"
                   type="file"
                   accept="image/*"
                   className={styles.fileInput}
+                  onChange={() => setFileError(null)}
                 />
+                {fileError ? (
+                  <span className={styles.errorMsg}>
+                    {fileError}
+                  </span>
+                ) : null}
               </div>
               <Button
                 variant="primary"
