@@ -3,11 +3,13 @@ import { useUsers } from '../hooks/useUsers';
 import { Button } from '@/components/ui/Button';
 import { UserResponse } from '@absence-record/shared';
 import { UserModal } from './UserModal';
+import { usePopup } from '@/components/ui/PopupContext';
 import styles from '@/App.module.css';
 
 export const EmployeeManagement: React.FC = () => {
   const { data: users, isLoading, isError, error, createUser, isCreating, updateUser, isUpdating, deleteUser } = useUsers();
-  
+  const { confirm, alert } = usePopup();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserResponse | null>(null);
 
@@ -22,12 +24,18 @@ export const EmployeeManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this employee?')) {
-      try {
-        await deleteUser(id);
-      } catch (e: any) {
-        alert(e.response?.data?.message || 'Failed to delete user');
-      }
+    try {
+      await confirm('Are you sure you want to delete this employee?', {
+        title: 'Delete Employee',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger',
+        onConfirm: async () => {
+          await deleteUser(id);
+        },
+      });
+    } catch (e: any) {
+      await alert(e.response?.data?.message || 'Failed to delete user', 'Error');
     }
   };
 
@@ -49,10 +57,10 @@ export const EmployeeManagement: React.FC = () => {
         <Button variant="primary" onClick={handleAdd}>+ Add Employee</Button>
       </div>
 
-      <UserModal 
-        open={modalOpen} 
-        onOpenChange={setModalOpen} 
-        user={editingUser} 
+      <UserModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        user={editingUser}
         onSubmit={handleSubmit}
         isLoading={isCreating || isUpdating}
       />
@@ -66,7 +74,7 @@ export const EmployeeManagement: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <Button variant="secondary" onClick={() => handleEdit(user)}>Edit</Button>
-              <Button variant="secondary" onClick={() => handleDelete(user.id)} style={{ color: '#dc2626', borderColor: '#fca5a5' }}>Delete</Button>
+              <Button variant="secondary" onClick={() => { handleDelete(user.id); }} style={{ color: '#dc2626', borderColor: '#fca5a5' }}>Delete</Button>
             </div>
           </div>
         ))}

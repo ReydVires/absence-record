@@ -24,3 +24,9 @@ CREATE TABLE IF NOT EXISTS attendance (
 
 ALTER TABLE attendance ADD COLUMN IF NOT EXISTS image_name TEXT;
 ALTER TABLE attendance ADD COLUMN IF NOT EXISTS check_out_time TIMESTAMP WITH TIME ZONE;
+
+-- Fix existing foreign key constraints to support CASCADE ON DELETE
+ALTER TABLE attendance DROP CONSTRAINT IF EXISTS attendance_user_id_users_id_fk;
+ALTER TABLE attendance DROP CONSTRAINT IF EXISTS attendance_user_id_fkey;
+ALTER TABLE attendance ADD CONSTRAINT attendance_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
