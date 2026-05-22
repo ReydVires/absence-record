@@ -1,0 +1,29 @@
+.flexCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selectInput {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  background-color: white;
+  width: 100%;
+}
+
+.errorMsgBlock {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+}

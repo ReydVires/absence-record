@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { UserResponse } from '@absence-record/shared';
-import styles from '@/App.module.css';
+import styles from './UserModal.module.css';
 
 interface UserModalProps {
   open: boolean;
@@ -45,8 +45,8 @@ export const UserModal: React.FC<UserModalProps> = ({ open, onOpenChange, user, 
       setError('Password is required for new users');
       return;
     }
-    if (password && password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (password && (password.length < 6 || password.length > 72)) {
+      setError('Password must be between 6 and 72 characters');
       return;
     }
 
@@ -84,7 +84,7 @@ export const UserModal: React.FC<UserModalProps> = ({ open, onOpenChange, user, 
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
+            placeholder="6 to 72 characters"
           />
         </div>
 
@@ -94,15 +94,14 @@ export const UserModal: React.FC<UserModalProps> = ({ open, onOpenChange, user, 
             id="user-role"
             value={role}
             onChange={(e) => setRole(e.target.value as any)}
-            className={styles.fileInput}
-            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db' }}
+            className={styles.selectInput}
           >
             <option value="employee">Employee</option>
             <option value="admin">Admin</option>
           </select>
         </div>
 
-        {error && <span className={styles.errorMsg} style={{ padding: '0.5rem' }}>{error}</span>}
+        {error && <span className={styles.errorMsgBlock}>{error}</span>}
 
         <Button type="submit" variant="primary" isLoading={isLoading} loadingText="Saving...">
           {user ? 'Save Changes' : 'Create User'}

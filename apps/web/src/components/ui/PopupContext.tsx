@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useRef } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import styles from './PopupContext.module.css';
 
 interface PopupOptions {
   title: string;
@@ -117,7 +118,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+        <div className={styles.popupActions}>
           {options.type === 'confirm' && (
             <Button variant="secondary" onClick={handleCancel}>
               {options.cancelText}

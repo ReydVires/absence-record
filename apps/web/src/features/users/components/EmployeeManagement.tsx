@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { UserResponse } from '@absence-record/shared';
 import { UserModal } from './UserModal';
 import { usePopup } from '@/components/ui/PopupContext';
-import styles from '@/App.module.css';
+import styles from './EmployeeManagement.module.css';
 
 export const EmployeeManagement: React.FC = () => {
   const { data: users, isLoading, isError, error, createUser, isCreating, updateUser, isUpdating, deleteUser } = useUsers();
@@ -51,9 +51,9 @@ export const EmployeeManagement: React.FC = () => {
   if (isError) return <div className={styles.error}>Error: {error?.message}</div>;
 
   return (
-    <div className={styles.flexCol} style={{ gap: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Employee Management</h2>
+    <div className={styles.flexColWide}>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Employee Management</h2>
         <Button variant="primary" onClick={handleAdd}>+ Add Employee</Button>
       </div>
 
@@ -69,12 +69,12 @@ export const EmployeeManagement: React.FC = () => {
         {users?.map((user) => (
           <div key={user.id} className={styles.recordItem}>
             <div className={styles.recordInfo}>
-              <span className={styles.email} style={{ fontSize: '1rem' }}>{user.email}</span>
+              <span className={styles.email}>{user.email}</span>
               <span className={styles.recordNote}>{(user as any).role === 'admin' ? 'HR Admin' : 'Employee'}</span>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className={styles.actionGroup}>
               <Button variant="secondary" onClick={() => handleEdit(user)}>Edit</Button>
-              <Button variant="secondary" onClick={() => { handleDelete(user.id); }} style={{ color: '#dc2626', borderColor: '#fca5a5' }}>Delete</Button>
+              <Button variant="secondary" onClick={() => { handleDelete(user.id); }} className={styles.deleteBtn}>Delete</Button>
             </div>
           </div>
         ))}
