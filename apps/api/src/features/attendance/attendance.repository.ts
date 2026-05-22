@@ -18,6 +18,7 @@ export interface AttendanceRow {
   date: Date;
   check_out_time: Date | null;
   created_at: Date;
+  user_email?: string;
 }
 
 @Injectable()
@@ -31,24 +32,34 @@ export class AttendanceRepository {
   }
 
   private mapRow(row: AttendanceRow): Attendance {
-    const { user_id, created_at, image_name, check_out_time, ...rest } = row;
+    const { user_id, created_at, image_name, check_out_time, user_email, ...rest } = row;
     return {
       ...rest,
       userId: user_id,
       imageName: image_name,
       checkOutTime: check_out_time,
       createdAt: created_at,
+      userEmail: user_email,
     };
   }
 
   async findAll(): Promise<Attendance[]> {
-    const { rows } = await this.db.query<AttendanceRow>('SELECT * FROM attendance ORDER BY created_at DESC');
+    const { rows } = await this.db.query<AttendanceRow>(
+      `SELECT a.*, u.email as user_email 
+       FROM attendance a 
+       JOIN users u ON a.user_id = u.id 
+       ORDER BY a.created_at DESC`
+    );
     return rows.map(this.mapRow);
   }
 
   async findByUserId(userId: string): Promise<Attendance[]> {
     const { rows } = await this.db.query<AttendanceRow>(
-      'SELECT * FROM attendance WHERE user_id = $1 ORDER BY created_at DESC',
+      `SELECT a.*, u.email as user_email 
+       FROM attendance a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.user_id = $1 
+       ORDER BY a.created_at DESC`,
       [userId]
     );
     return rows.map(this.mapRow);

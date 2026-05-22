@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const LoginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).max(72),
 });
 
 export type LoginRequest = z.infer<typeof LoginSchema>;
@@ -33,7 +33,7 @@ export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequestSchema>;
 
 export const CreateUserSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).max(72),
   role: z.enum(['employee', 'admin']),
 });
 
@@ -41,7 +41,7 @@ export type CreateUserDto = z.infer<typeof CreateUserSchema>;
 
 export const UpdateUserSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6).optional().or(z.literal('')),
+  password: z.string().min(6).max(72).optional().or(z.literal('')),
   role: z.enum(['employee', 'admin']),
 });
 

@@ -14,6 +14,7 @@ export const AttendanceResponseSchema = CreateAttendanceSchema.extend({
   id: z.string().uuid(),
   checkOutTime: z.string().datetime().nullable().optional(),
   createdAt: z.string().datetime(),
+  userEmail: z.string().email().optional(),
 });
 
 export type AttendanceResponse = z.infer<typeof AttendanceResponseSchema>;

@@ -109,6 +109,11 @@ export const AttendanceDashboard: React.FC<Props> = ({ user }) => {
             <div key={record.id} className={styles.recordItem}>
               <div className={styles.recordInfo}>
                 <span className={styles.recordDate}>{new Date(record.date).toLocaleDateString()}</span>
+                {user.role === 'admin' && record.userEmail && (
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary)', marginTop: '0.125rem', marginBottom: '0.125rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span>👤</span> <span>{record.userEmail}</span>
+                  </span>
+                )}
                 <span className={styles.recordNote}>
                   {record.imageName ? `📎 ${record.imageName}` : record.note || 'No notes added'}
                 </span>

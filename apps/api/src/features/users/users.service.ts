@@ -37,17 +37,24 @@ export class UsersService {
   }
 
   async update(id: string, data: UpdateUserDto): Promise<ApiResponse<any>> {
-    let hashedPassword = undefined;
-    if (data.password) {
-      hashedPassword = await bcrypt.hash(data.password, 10);
+    // Validate user exists before any expensive operations
+    const currentUser = await this.userRepository.findById(id);
+    if (!currentUser) {
+      throw new NotFoundException('User not found');
     }
 
     // Check email conflict if changing email
-    if (data.email) {
+    if (data.email && data.email !== currentUser.email) {
       const existingUser = await this.userRepository.findByEmail(data.email);
-      if (existingUser && existingUser.id !== id) {
+      if (existingUser) {
         throw new ConflictException('User with this email already exists');
       }
+    }
+
+    // Hash password only after all validations pass
+    let hashedPassword = undefined;
+    if (data.password) {
+      hashedPassword = await bcrypt.hash(data.password, 10);
     }
 
     const updatedUser = await this.userRepository.update(id, {
@@ -55,10 +62,6 @@ export class UsersService {
       password: hashedPassword,
       role: data.role,
     });
-
-    if (!updatedUser) {
-      throw new NotFoundException('User not found');
-    }
 
     return {
       statusCode: 200,
